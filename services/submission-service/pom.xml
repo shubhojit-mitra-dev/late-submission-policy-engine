@@ -11,7 +11,7 @@
 	<groupId>com.lspe</groupId>
 	<artifactId>submission-service</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
-	<name/>
+	<name>Submission Service</name>
 	<description/>
 	<url/>
 	<licenses>
