@@ -1,8 +1,10 @@
 package com.lspe.policy.service;
 
+import com.lspe.common.exception.PolicyNotFoundException;
 import com.lspe.policy.domain.PolicyEvaluationService;
 import com.lspe.policy.dto.request.CreatePolicyRequest;
 import com.lspe.policy.dto.response.PolicyResponse;
+import com.lspe.policy.dto.response.PolicyVersionResponse;
 import com.lspe.policy.entity.Policy;
 import com.lspe.policy.entity.PolicyVersion;
 import com.lspe.policy.mapper.PolicyMapper;
@@ -64,5 +66,12 @@ public class PolicyService {
                 .stream()
                 .map(policyMapper::toResponse)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public PolicyResponse getPolicyById(String id) {
+        return policyRepository.findByIdAndActiveTrue(id)
+                .map(policyMapper::toResponse)
+                .orElseThrow(() -> new PolicyNotFoundException(id));
     }
 }
