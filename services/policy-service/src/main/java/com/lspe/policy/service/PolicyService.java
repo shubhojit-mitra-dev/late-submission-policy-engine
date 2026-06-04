@@ -115,4 +115,15 @@ public class PolicyService {
         
         log.info("Policy {} soft deleted", id);
     }
+
+    @Transactional(readOnly = true)
+    public List<PolicyVersionResponse> getPolicyVersions(String policyId) {
+        policyRepository.findByIdAndActiveTrue(policyId)
+                .orElseThrow(() -> new PolicyNotFoundException(policyId));
+        
+        return policyVersionRepository.findByPolicyId(policyId)
+                .stream()
+                .map(policyMapper::toVersionResponse)
+                .toList();
+    }
 }
