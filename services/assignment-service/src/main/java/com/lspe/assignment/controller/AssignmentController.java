@@ -1,5 +1,6 @@
 package com.lspe.assignment.controller;
 
+import com.lspe.assignment.dto.request.AssignPolicyRequest;
 import com.lspe.assignment.dto.request.CreateAssignmentRequest;
 import com.lspe.assignment.dto.response.AssignmentResponse;
 import com.lspe.assignment.service.AssignmentService;
@@ -58,5 +59,13 @@ public class AssignmentController {
     public ResponseEntity<ApiResponse<Void>> deleteAssignment(@PathVariable String id) {
         assignmentService.deleteAssignment(id);
         return ResponseEntity.ok(ApiResponse.of(null, "Assignment deleted successfully"));
+    }
+
+    @PostMapping("/{id}/policy")
+    public ResponseEntity<ApiResponse<AssignmentResponse>> assignPolicy(
+            @PathVariable String id,
+            @RequestBody @Valid AssignPolicyRequest request) {
+        AssignmentResponse response = assignmentService.assignPolicy(id, request);
+        return ResponseEntity.ok(ApiResponse.of(response, "Policy assigned successfully"));
     }
 }
