@@ -1,5 +1,6 @@
 package com.lspe.policy.domain;
 
+import com.lspe.common.enums.PenaltyType;
 import com.lspe.common.enums.SubmissionStatus;
 import com.lspe.policy.entity.PolicyVersion;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,14 @@ public class PolicyEvaluationService {
                     SubmissionStatus.ACCEPTED,
                     "Within grace period"
             );
+        }
+
+        // Step 4 — Calculate penalty based on type:
+        double penalty = 0.0;
+        if (policy.getPenaltyType() == PenaltyType.PERCENTAGE) {
+            penalty = originalScore * (policy.getPenaltyValue() / 100.0);
+        } else if (policy.getPenaltyType() == PenaltyType.FIXED) {
+            penalty = policy.getPenaltyValue();
         }
 
         // Waiting for the rest of the formula...
