@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,5 +35,11 @@ public class PolicyController {
     public ResponseEntity<ApiResponse<List<PolicyResponse>>> getAllPolicies() {
         List<PolicyResponse> response = policyService.getAllPolicies();
         return ResponseEntity.ok(ApiResponse.of(response, "Policies retrieved successfully"));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<PolicyResponse>> getPolicyById(@PathVariable String id) {
+        PolicyResponse response = policyService.getPolicyById(id);
+        return ResponseEntity.ok(ApiResponse.of(response, "Policy retrieved successfully"));
     }
 }
