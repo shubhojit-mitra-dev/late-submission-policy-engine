@@ -1,7 +1,9 @@
 package com.lspe.policy.controller;
 
 import com.lspe.common.response.ApiResponse;
+import com.lspe.policy.domain.EvaluationResult;
 import com.lspe.policy.dto.request.CreatePolicyRequest;
+import com.lspe.policy.dto.request.EvaluationRequest;
 import com.lspe.policy.dto.request.UpdatePolicyRequest;
 import com.lspe.policy.dto.response.PolicyResponse;
 import com.lspe.policy.dto.response.PolicyVersionResponse;
@@ -73,5 +75,16 @@ public class PolicyController {
             @PathVariable Integer versionNo) {
         PolicyVersionResponse response = policyService.getPolicyVersion(id, versionNo);
         return ResponseEntity.ok(ApiResponse.of(response, "Policy version retrieved successfully"));
+    }
+
+    @PostMapping("/evaluate")
+    public ResponseEntity<ApiResponse<EvaluationResult>> previewEvaluation(
+            @RequestBody @Valid EvaluationRequest request) {
+        EvaluationResult result = policyService.previewEvaluation(
+                request.policyVersionId(),
+                request.originalScore(),
+                request.hoursLate()
+        );
+        return ResponseEntity.ok(ApiResponse.of(result, "Evaluation completed successfully"));
     }
 }
