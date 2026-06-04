@@ -1,6 +1,7 @@
 package com.lspe.policy.service;
 
 import com.lspe.common.exception.PolicyNotFoundException;
+import com.lspe.common.exception.ResourceNotFoundException;
 import com.lspe.policy.domain.PolicyEvaluationService;
 import com.lspe.policy.dto.request.CreatePolicyRequest;
 import com.lspe.policy.dto.request.UpdatePolicyRequest;
@@ -33,16 +34,10 @@ public class PolicyService {
     public PolicyResponse createPolicy(CreatePolicyRequest request) {
         log.info("Creating new policy: {}", request.getName());
 
-        // Map request to entity via mapper
         Policy policy = policyMapper.toEntity(request);
-        
-        // Set id to UUID manually as requested
         policy.setId(UUID.randomUUID().toString());
-
-        // Save policy
         Policy savedPolicy = policyRepository.save(policy);
 
-        // Auto-create first version (immutable snapshot)
         PolicyVersion version = new PolicyVersion();
         version.setPolicy(savedPolicy);
         version.setVersionNo(1);
@@ -54,10 +49,7 @@ public class PolicyService {
         version.setMaxPenalty(savedPolicy.getMaxPenalty());
         version.setRejectAfterDays(savedPolicy.getRejectAfterDays());
 
-        // Save the version
         policyVersionRepository.save(version);
-
-        // Return mapped response
         return policyMapper.toResponse(savedPolicy);
     }
 
@@ -125,5 +117,12 @@ public class PolicyService {
                 .stream()
                 .map(policyMapper::toVersionResponse)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public PolicyVersionResponse getPolicyVersion(String policyId, Integer versionNo) {
+        return policyVersionRepository.findByPolicyIdAndVersionNo(policyId, versionNo)
+                .map(policyMapper::toVersionResponse)
+                .orElseThrow(() -> new ResourceNotFoundException("Policy version not found"));
     }
 }
