@@ -58,4 +58,25 @@ public class AssignmentService {
                 
         return assignmentMapper.toResponseWithPolicy(assignment, policyResponse);
     }
+
+    @Transactional
+    public AssignmentResponse updateAssignment(String id, CreateAssignmentRequest request) {
+        Assignment existing = assignmentRepository.findById(id)
+                .orElseThrow(() -> new com.lspe.common.exception.ResourceNotFoundException("Assignment not found with id: " + id));
+        
+        existing.setTitle(request.title());
+        existing.setDescription(request.description());
+        existing.setCourseCode(request.courseCode());
+        existing.setDueDate(request.dueDate());
+        existing.setCreatedBy(request.createdBy());
+        
+        Assignment savedAssignment = assignmentRepository.save(existing);
+        
+        AssignmentPolicyResponse policyResponse = assignmentPolicyRepository
+                .findByAssignmentIdAndActiveTrue(savedAssignment.getId())
+                .map(assignmentMapper::toPolicyResponse)
+                .orElse(null);
+                
+        return assignmentMapper.toResponseWithPolicy(savedAssignment, policyResponse);
+    }
 }
