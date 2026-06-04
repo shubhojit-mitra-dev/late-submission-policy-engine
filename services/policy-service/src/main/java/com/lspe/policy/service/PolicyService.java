@@ -3,6 +3,7 @@ package com.lspe.policy.service;
 import com.lspe.common.exception.PolicyNotFoundException;
 import com.lspe.policy.domain.PolicyEvaluationService;
 import com.lspe.policy.dto.request.CreatePolicyRequest;
+import com.lspe.policy.dto.request.UpdatePolicyRequest;
 import com.lspe.policy.dto.response.PolicyResponse;
 import com.lspe.policy.dto.response.PolicyVersionResponse;
 import com.lspe.policy.entity.Policy;
@@ -73,5 +74,34 @@ public class PolicyService {
         return policyRepository.findByIdAndActiveTrue(id)
                 .map(policyMapper::toResponse)
                 .orElseThrow(() -> new PolicyNotFoundException(id));
+    }
+
+    @Transactional
+    public PolicyResponse updatePolicy(String id, UpdatePolicyRequest request) {
+        log.info("Updating policy with id: {}", id);
+        
+        Policy existingPolicy = policyRepository.findByIdAndActiveTrue(id)
+                .orElseThrow(() -> new PolicyNotFoundException(id));
+        
+        policyMapper.updatePolicyFromRequest(request, existingPolicy);
+        Policy savedPolicy = policyRepository.save(existingPolicy);
+        
+        Integer currentVersionCount = policyVersionRepository.countByPolicyId(id);
+        int nextVersionNo = (currentVersionCount == null ? 0 : currentVersionCount) + 1;
+        
+        PolicyVersion newVersion = new PolicyVersion();
+        newVersion.setPolicy(savedPolicy);
+        newVersion.setVersionNo(nextVersionNo);
+        newVersion.setName(savedPolicy.getName());
+        newVersion.setDescription(savedPolicy.getDescription());
+        newVersion.setPenaltyType(savedPolicy.getPenaltyType());
+        newVersion.setPenaltyValue(savedPolicy.getPenaltyValue());
+        newVersion.setGraceHours(savedPolicy.getGraceHours());
+        newVersion.setMaxPenalty(savedPolicy.getMaxPenalty());
+        newVersion.setRejectAfterDays(savedPolicy.getRejectAfterDays());
+        
+        policyVersionRepository.save(newVersion);
+        
+        return policyMapper.toResponse(savedPolicy);
     }
 }
