@@ -2,6 +2,7 @@ package com.lspe.policy.service;
 
 import com.lspe.common.exception.PolicyNotFoundException;
 import com.lspe.common.exception.ResourceNotFoundException;
+import com.lspe.policy.domain.EvaluationResult;
 import com.lspe.policy.domain.PolicyEvaluationService;
 import com.lspe.policy.dto.request.CreatePolicyRequest;
 import com.lspe.policy.dto.request.UpdatePolicyRequest;
@@ -124,5 +125,13 @@ public class PolicyService {
         return policyVersionRepository.findByPolicyIdAndVersionNo(policyId, versionNo)
                 .map(policyMapper::toVersionResponse)
                 .orElseThrow(() -> new ResourceNotFoundException("Policy version not found"));
+    }
+
+    @Transactional(readOnly = true)
+    public EvaluationResult previewEvaluation(String policyVersionId, Double originalScore, Double hoursLate) {
+        PolicyVersion version = policyVersionRepository.findById(policyVersionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Policy version not found with id: " + policyVersionId));
+        
+        return policyEvaluationService.evaluate(version, originalScore, hoursLate);
     }
 }
