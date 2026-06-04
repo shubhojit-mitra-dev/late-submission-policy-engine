@@ -79,4 +79,15 @@ public class AssignmentService {
                 
         return assignmentMapper.toResponseWithPolicy(savedAssignment, policyResponse);
     }
+
+    @Transactional
+    public void deleteAssignment(String id) {
+        Assignment existing = assignmentRepository.findById(id)
+                .orElseThrow(() -> new com.lspe.common.exception.ResourceNotFoundException("Assignment not found with id: " + id));
+        
+        assignmentPolicyRepository.findByAssignmentId(id)
+                .forEach(assignmentPolicyRepository::delete);
+                
+        assignmentRepository.delete(existing);
+    }
 }
