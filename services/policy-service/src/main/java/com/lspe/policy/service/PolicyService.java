@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -55,5 +56,13 @@ public class PolicyService {
 
         // Return mapped response
         return policyMapper.toResponse(savedPolicy);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PolicyResponse> getAllPolicies() {
+        return policyRepository.findByActiveTrue()
+                .stream()
+                .map(policyMapper::toResponse)
+                .toList();
     }
 }
