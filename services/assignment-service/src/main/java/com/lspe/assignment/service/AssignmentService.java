@@ -2,6 +2,7 @@ package com.lspe.assignment.service;
 
 import com.lspe.assignment.client.PolicyServiceClient;
 import com.lspe.assignment.dto.request.CreateAssignmentRequest;
+import com.lspe.assignment.dto.response.AssignmentPolicyResponse;
 import com.lspe.assignment.dto.response.AssignmentResponse;
 import com.lspe.assignment.entity.Assignment;
 import com.lspe.assignment.mapper.AssignmentMapper;
@@ -30,5 +31,18 @@ public class AssignmentService {
         Assignment savedAssignment = assignmentRepository.save(assignment);
         
         return assignmentMapper.toResponse(savedAssignment);
+    }
+
+    @Transactional(readOnly = true)
+    public java.util.List<AssignmentResponse> getAllAssignments() {
+        return assignmentRepository.findAll().stream()
+                .map(assignment -> {
+                    AssignmentPolicyResponse policyResponse = assignmentPolicyRepository
+                            .findByAssignmentIdAndActiveTrue(assignment.getId())
+                            .map(assignmentMapper::toPolicyResponse)
+                            .orElse(null);
+                    return assignmentMapper.toResponseWithPolicy(assignment, policyResponse);
+                })
+                .toList();
     }
 }

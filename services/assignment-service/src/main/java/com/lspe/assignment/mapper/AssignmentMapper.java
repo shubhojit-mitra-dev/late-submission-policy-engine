@@ -18,6 +18,10 @@ public interface AssignmentMapper {
     @Mapping(target = "activePolicyMapping", ignore = true)
     AssignmentResponse toResponse(Assignment assignment);
 
+    @Mapping(target = "id", source = "assignment.id")
+    @Mapping(target = "activePolicyMapping", source = "policyResponse")
+    AssignmentResponse toResponseWithPolicy(Assignment assignment, AssignmentPolicyResponse policyResponse);
+
     @Mapping(target = "assignmentId", source = "assignment.id")
     AssignmentPolicyResponse toPolicyResponse(AssignmentPolicy assignmentPolicy);
 }
