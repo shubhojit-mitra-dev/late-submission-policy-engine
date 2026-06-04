@@ -1,5 +1,6 @@
 package com.lspe.policy.exception;
 
+import com.lspe.common.exception.InvalidPolicyException;
 import com.lspe.common.exception.ResourceNotFoundException;
 import com.lspe.common.response.ApiResponse;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleResourceNotFoundException(ResourceNotFoundException ex) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidPolicyException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidPolicyException(InvalidPolicyException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.error(ex.getMessage()));
     }
 }
