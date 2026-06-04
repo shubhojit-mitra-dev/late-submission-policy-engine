@@ -51,6 +51,9 @@ public class PolicyEvaluationService {
             penalty = Math.min(penalty, policy.getMaxPenalty());
         }
 
+        // Calculate final score:
+        double finalScore = Math.max(0.0, originalScore - penalty);
+
         // Waiting for the rest of the formula...
         return null;
     }
