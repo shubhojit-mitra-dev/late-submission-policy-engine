@@ -1,10 +1,12 @@
 package com.lspe.assignment.service;
 
 import com.lspe.assignment.client.PolicyServiceClient;
+import com.lspe.assignment.dto.request.AssignPolicyRequest;
 import com.lspe.assignment.dto.request.CreateAssignmentRequest;
 import com.lspe.assignment.dto.response.AssignmentPolicyResponse;
 import com.lspe.assignment.dto.response.AssignmentResponse;
 import com.lspe.assignment.entity.Assignment;
+import com.lspe.assignment.entity.AssignmentPolicy;
 import com.lspe.assignment.mapper.AssignmentMapper;
 import com.lspe.assignment.repository.AssignmentPolicyRepository;
 import com.lspe.assignment.repository.AssignmentRepository;
@@ -89,5 +91,28 @@ public class AssignmentService {
                 .forEach(assignmentPolicyRepository::delete);
                 
         assignmentRepository.delete(existing);
+    }
+
+    @Transactional
+    public AssignmentResponse assignPolicy(String assignmentId, AssignPolicyRequest request) {
+        Assignment assignment = assignmentRepository.findById(assignmentId)
+                .orElseThrow(() -> new com.lspe.common.exception.ResourceNotFoundException("Assignment not found with id: " + assignmentId));
+                
+        if (!policyServiceClient.policyVersionExists(request.policyVersionId())) {
+            throw new com.lspe.common.exception.ResourceNotFoundException("Policy version not found: " + request.policyVersionId());
+        }
+        
+        assignmentPolicyRepository.deactivateAllByAssignmentId(assignmentId);
+        
+        AssignmentPolicy newPolicy = AssignmentPolicy.builder()
+                .assignment(assignment)
+                .policyVersionId(request.policyVersionId())
+                .active(true)
+                .build();
+                
+        AssignmentPolicy savedPolicy = assignmentPolicyRepository.save(newPolicy);
+        
+        AssignmentPolicyResponse policyResponse = assignmentMapper.toPolicyResponse(savedPolicy);
+        return assignmentMapper.toResponseWithPolicy(assignment, policyResponse);
     }
 }
