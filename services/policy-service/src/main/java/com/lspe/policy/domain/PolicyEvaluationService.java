@@ -38,12 +38,17 @@ public class PolicyEvaluationService {
             );
         }
 
-        // Step 4 — Calculate penalty based on type:
+        // Calculate penalty based on type:
         double penalty = 0.0;
         if (policy.getPenaltyType() == PenaltyType.PERCENTAGE) {
             penalty = originalScore * (policy.getPenaltyValue() / 100.0);
         } else if (policy.getPenaltyType() == PenaltyType.FIXED) {
             penalty = policy.getPenaltyValue();
+        }
+
+        // Apply max penalty cap:
+        if (policy.getMaxPenalty() != null) {
+            penalty = Math.min(penalty, policy.getMaxPenalty());
         }
 
         // Waiting for the rest of the formula...
