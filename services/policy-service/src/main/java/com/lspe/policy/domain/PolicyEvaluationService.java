@@ -9,7 +9,7 @@ public class PolicyEvaluationService {
 
     public EvaluationResult evaluate(PolicyVersion policy, Double originalScore, Double hoursLate) {
         
-        // Step 1 — Check hard deadline rejection:
+        // Check hard deadline rejection:
         if (policy.getRejectAfterDays() != null && hoursLate > (policy.getRejectAfterDays() * 24.0)) {
             return new EvaluationResult(
                     originalScore,
@@ -21,6 +21,9 @@ public class PolicyEvaluationService {
                     "Submission rejected: exceeds hard deadline"
             );
         }
+
+        // Calculate effective lateness:
+        double effectiveLatenessHours = Math.max(0.0, hoursLate - policy.getGraceHours());
 
         // Waiting for the rest of the formula...
         return null;
