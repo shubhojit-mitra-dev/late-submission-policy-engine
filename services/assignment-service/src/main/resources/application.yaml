@@ -1,3 +1,49 @@
+server:
+  port: 8082
+
 spring:
   application:
     name: assignment-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/lspe_db?currentSchema=assignment_schema
+    username: lspe_user
+    password: lspe_password
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: AssignmentServicePool
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 300000
+      connection-timeout: 20000
+      max-lifetime: 1200000
+
+  jpa:
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: assignment_schema
+        format_sql: true
+
+  flyway:
+    enabled: true
+    url: jdbc:postgresql://localhost:5432/lspe_db
+    user: lspe_user
+    password: lspe_password
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    schemas: assignment_schema
+    default-schema: assignment_schema
+
+services:
+  policy-service:
+    base-url: http://localhost:8081
+
+logging:
+  level:
+    com.lspe.assignment: DEBUG
+    org.flywaydb: INFO

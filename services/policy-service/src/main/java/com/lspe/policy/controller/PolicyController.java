@@ -77,6 +77,13 @@ public class PolicyController {
         return ResponseEntity.ok(ApiResponse.of(response, "Policy version retrieved successfully"));
     }
 
+    @GetMapping("/versions/{versionId}")
+    public ResponseEntity<ApiResponse<PolicyVersionResponse>> getPolicyVersionById(
+            @PathVariable String versionId) {
+        PolicyVersionResponse response = policyService.getPolicyVersionById(versionId);
+        return ResponseEntity.ok(ApiResponse.of(response, "Policy version retrieved successfully"));
+    }
+
     @PostMapping("/evaluate")
     public ResponseEntity<ApiResponse<EvaluationResult>> previewEvaluation(
             @RequestBody @Valid EvaluationRequest request) {
