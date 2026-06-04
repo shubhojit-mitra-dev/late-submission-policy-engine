@@ -4,6 +4,7 @@ import com.lspe.common.response.ApiResponse;
 import com.lspe.policy.dto.request.CreatePolicyRequest;
 import com.lspe.policy.dto.request.UpdatePolicyRequest;
 import com.lspe.policy.dto.response.PolicyResponse;
+import com.lspe.policy.dto.response.PolicyVersionResponse;
 import com.lspe.policy.service.PolicyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -58,5 +59,11 @@ public class PolicyController {
     public ResponseEntity<ApiResponse<Void>> deletePolicy(@PathVariable String id) {
         policyService.deletePolicy(id);
         return ResponseEntity.ok(ApiResponse.of(null, "Policy deleted successfully"));
+    }
+
+    @GetMapping("/{id}/versions")
+    public ResponseEntity<ApiResponse<List<PolicyVersionResponse>>> getPolicyVersions(@PathVariable String id) {
+        List<PolicyVersionResponse> response = policyService.getPolicyVersions(id);
+        return ResponseEntity.ok(ApiResponse.of(response, "Policy versions retrieved successfully"));
     }
 }
