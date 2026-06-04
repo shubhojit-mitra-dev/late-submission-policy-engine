@@ -115,4 +115,15 @@ public class AssignmentService {
         AssignmentPolicyResponse policyResponse = assignmentMapper.toPolicyResponse(savedPolicy);
         return assignmentMapper.toResponseWithPolicy(assignment, policyResponse);
     }
+
+    @Transactional(readOnly = true)
+    public java.util.List<AssignmentPolicyResponse> getPolicyHistory(String assignmentId) {
+        if (!assignmentRepository.existsById(assignmentId)) {
+            throw new com.lspe.common.exception.ResourceNotFoundException("Assignment not found with id: " + assignmentId);
+        }
+        
+        return assignmentPolicyRepository.findByAssignmentId(assignmentId).stream()
+                .map(assignmentMapper::toPolicyResponse)
+                .toList();
+    }
 }
