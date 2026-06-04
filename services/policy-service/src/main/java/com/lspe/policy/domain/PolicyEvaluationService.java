@@ -54,7 +54,14 @@ public class PolicyEvaluationService {
         // Calculate final score:
         double finalScore = Math.max(0.0, originalScore - penalty);
 
-        // Waiting for the rest of the formula...
-        return null;
+        return new EvaluationResult(
+                originalScore,
+                hoursLate,
+                effectiveLatenessHours,
+                penalty,
+                finalScore,
+                SubmissionStatus.LATE_ACCEPTED,
+                "Late submission: penalty applied"
+        );
     }
 }
