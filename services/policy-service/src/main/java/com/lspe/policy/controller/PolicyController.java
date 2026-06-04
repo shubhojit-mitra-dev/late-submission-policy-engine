@@ -8,10 +8,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/policies")
@@ -25,5 +28,11 @@ public class PolicyController {
         PolicyResponse response = policyService.createPolicy(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.of(response, "Policy created successfully"));
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<PolicyResponse>>> getAllPolicies() {
+        List<PolicyResponse> response = policyService.getAllPolicies();
+        return ResponseEntity.ok(ApiResponse.of(response, "Policies retrieved successfully"));
     }
 }
