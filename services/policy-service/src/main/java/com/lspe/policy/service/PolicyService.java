@@ -104,4 +104,15 @@ public class PolicyService {
         
         return policyMapper.toResponse(savedPolicy);
     }
+
+    @Transactional
+    public void deletePolicy(String id) {
+        Policy existingPolicy = policyRepository.findByIdAndActiveTrue(id)
+                .orElseThrow(() -> new PolicyNotFoundException(id));
+        
+        existingPolicy.setActive(false);
+        policyRepository.save(existingPolicy);
+        
+        log.info("Policy {} soft deleted", id);
+    }
 }
