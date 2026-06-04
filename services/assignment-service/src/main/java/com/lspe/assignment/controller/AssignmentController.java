@@ -2,6 +2,7 @@ package com.lspe.assignment.controller;
 
 import com.lspe.assignment.dto.request.AssignPolicyRequest;
 import com.lspe.assignment.dto.request.CreateAssignmentRequest;
+import com.lspe.assignment.dto.response.AssignmentPolicyResponse;
 import com.lspe.assignment.dto.response.AssignmentResponse;
 import com.lspe.assignment.service.AssignmentService;
 import com.lspe.common.response.ApiResponse;
@@ -67,5 +68,11 @@ public class AssignmentController {
             @RequestBody @Valid AssignPolicyRequest request) {
         AssignmentResponse response = assignmentService.assignPolicy(id, request);
         return ResponseEntity.ok(ApiResponse.of(response, "Policy assigned successfully"));
+    }
+
+    @GetMapping("/{id}/policy/history")
+    public ResponseEntity<ApiResponse<List<AssignmentPolicyResponse>>> getPolicyHistory(@PathVariable String id) {
+        List<AssignmentPolicyResponse> history = assignmentService.getPolicyHistory(id);
+        return ResponseEntity.ok(ApiResponse.of(history, "Policy history retrieved successfully"));
     }
 }
