@@ -45,4 +45,17 @@ public class AssignmentService {
                 })
                 .toList();
     }
+
+    @Transactional(readOnly = true)
+    public AssignmentResponse getAssignmentById(String id) {
+        Assignment assignment = assignmentRepository.findById(id)
+                .orElseThrow(() -> new com.lspe.common.exception.ResourceNotFoundException("Assignment not found with id: " + id));
+        
+        AssignmentPolicyResponse policyResponse = assignmentPolicyRepository
+                .findByAssignmentIdAndActiveTrue(assignment.getId())
+                .map(assignmentMapper::toPolicyResponse)
+                .orElse(null);
+                
+        return assignmentMapper.toResponseWithPolicy(assignment, policyResponse);
+    }
 }
