@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +35,6 @@ public class PolicyService {
         log.info("Creating new policy: {}", request.getName());
 
         Policy policy = policyMapper.toEntity(request);
-        policy.setId(UUID.randomUUID().toString());
         Policy savedPolicy = policyRepository.save(policy);
 
         PolicyVersion version = new PolicyVersion();

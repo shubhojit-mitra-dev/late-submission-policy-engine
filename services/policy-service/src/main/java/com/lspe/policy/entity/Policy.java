@@ -13,7 +13,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.UuidGenerator;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 
 import java.time.LocalDateTime;
 
@@ -26,7 +27,7 @@ import java.time.LocalDateTime;
 public class Policy {
 
     @Id
-    @UuidGenerator
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
     @Column(nullable = false)
