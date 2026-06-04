@@ -2,6 +2,7 @@ package com.lspe.policy.controller;
 
 import com.lspe.common.response.ApiResponse;
 import com.lspe.policy.dto.request.CreatePolicyRequest;
+import com.lspe.policy.dto.request.UpdatePolicyRequest;
 import com.lspe.policy.dto.response.PolicyResponse;
 import com.lspe.policy.service.PolicyService;
 import jakarta.validation.Valid;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,5 +43,13 @@ public class PolicyController {
     public ResponseEntity<ApiResponse<PolicyResponse>> getPolicyById(@PathVariable String id) {
         PolicyResponse response = policyService.getPolicyById(id);
         return ResponseEntity.ok(ApiResponse.of(response, "Policy retrieved successfully"));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<PolicyResponse>> updatePolicy(
+            @PathVariable String id,
+            @RequestBody @Valid UpdatePolicyRequest request) {
+        PolicyResponse response = policyService.updatePolicy(id, request);
+        return ResponseEntity.ok(ApiResponse.of(response, "Policy updated successfully"));
     }
 }
