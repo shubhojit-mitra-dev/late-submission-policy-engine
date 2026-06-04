@@ -66,4 +66,12 @@ public class PolicyController {
         List<PolicyVersionResponse> response = policyService.getPolicyVersions(id);
         return ResponseEntity.ok(ApiResponse.of(response, "Policy versions retrieved successfully"));
     }
+
+    @GetMapping("/{id}/versions/{versionNo}")
+    public ResponseEntity<ApiResponse<PolicyVersionResponse>> getPolicyVersion(
+            @PathVariable String id,
+            @PathVariable Integer versionNo) {
+        PolicyVersionResponse response = policyService.getPolicyVersion(id, versionNo);
+        return ResponseEntity.ok(ApiResponse.of(response, "Policy version retrieved successfully"));
+    }
 }
