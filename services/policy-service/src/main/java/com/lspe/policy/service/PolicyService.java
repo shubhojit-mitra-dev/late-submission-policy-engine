@@ -126,6 +126,13 @@ public class PolicyService {
     }
 
     @Transactional(readOnly = true)
+    public PolicyVersionResponse getPolicyVersionById(String versionId) {
+        return policyVersionRepository.findById(versionId)
+                .map(policyMapper::toVersionResponse)
+                .orElseThrow(() -> new ResourceNotFoundException("Policy version not found with id: " + versionId));
+    }
+
+    @Transactional(readOnly = true)
     public EvaluationResult previewEvaluation(String policyVersionId, Double originalScore, Double hoursLate) {
         PolicyVersion version = policyVersionRepository.findById(policyVersionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Policy version not found with id: " + policyVersionId));
