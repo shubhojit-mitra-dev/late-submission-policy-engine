@@ -25,6 +25,18 @@ public class PolicyEvaluationService {
         // Calculate effective lateness:
         double effectiveLatenessHours = Math.max(0.0, hoursLate - policy.getGraceHours());
 
+        if (0.0 == effectiveLatenessHours) {
+            return new EvaluationResult(
+                    originalScore,
+                    hoursLate,
+                    effectiveLatenessHours,
+                    0.0,
+                    originalScore,
+                    SubmissionStatus.ACCEPTED,
+                    "Within grace period"
+            );
+        }
+
         // Waiting for the rest of the formula...
         return null;
     }
