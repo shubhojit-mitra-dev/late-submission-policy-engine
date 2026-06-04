@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.NOT_FOUND)
 public class PolicyNotFoundException extends ResourceNotFoundException {
-    public PolicyNotFoundException(Long id) {
+    public PolicyNotFoundException(String id) {
         super("Policy not found with id: " + id);
     }
 }
