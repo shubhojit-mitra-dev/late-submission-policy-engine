@@ -1,0 +1,7 @@
+**/target/
+**/.idea/
+**/*.iml
+**/node_modules/
+frontend/dist/
+**/.git/
+**/*.md
