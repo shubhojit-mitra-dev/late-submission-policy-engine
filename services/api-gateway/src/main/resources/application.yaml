@@ -7,37 +7,38 @@ spring:
 
   cloud:
     gateway:
-      globalcors:
-        cors-configurations:
-          '[/**]':
-            allowedOrigins:
-              - "http://localhost:5173"
-              - "http://localhost:3000"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - OPTIONS
-            allowedHeaders:
-              - "*"
-            allowCredentials: true
+      server:
+        webflux:
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowedOrigins:
+                  - "http://localhost:5173"
+                  - "http://localhost:3000"
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PUT
+                  - DELETE
+                  - OPTIONS
+                allowedHeaders:
+                  - "*"
+                allowCredentials: true
+          routes:
+            - id: policy-service
+              uri: http://localhost:8081
+              predicates:
+                - Path=/api/policies,/api/policies/**
 
-      routes:
-        - id: policy-service
-          uri: http://localhost:8081
-          predicates:
-            - Path=/api/policies/**
+            - id: assignment-service
+              uri: http://localhost:8082
+              predicates:
+                - Path=/api/assignments,/api/assignments/**
 
-        - id: assignment-service
-          uri: http://localhost:8082
-          predicates:
-            - Path=/api/assignments/**
-
-        - id: submission-service
-          uri: http://localhost:8083
-          predicates:
-            - Path=/api/submissions/**
+            - id: submission-service
+              uri: http://localhost:8083
+              predicates:
+                - Path=/api/submissions,/api/submissions/**
 
 management:
   endpoints:
