@@ -2,7 +2,7 @@ package com.lspe.submission.client;
 
 import com.lspe.common.response.ApiResponse;
 import com.lspe.submission.dto.response.AssignmentDetailResponse;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
@@ -10,10 +10,13 @@ import org.springframework.web.client.RestClient;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class AssignmentServiceClient {
 
     private final RestClient assignmentServiceRestClient;
+
+    public AssignmentServiceClient(@Qualifier("assignmentServiceRestClient") RestClient assignmentServiceRestClient) {
+        this.assignmentServiceRestClient = assignmentServiceRestClient;
+    }
 
     public AssignmentDetailResponse getAssignment(String assignmentId) {
         log.debug("Fetching assignment details for id: {}", assignmentId);
