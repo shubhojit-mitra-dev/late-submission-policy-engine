@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.HttpClientErrorException;
+import com.lspe.common.exception.ResourceNotFoundException;
 
 @Slf4j
 @Component
@@ -21,15 +23,19 @@ public class AssignmentServiceClient {
     public AssignmentDetailResponse getAssignment(String assignmentId) {
         log.debug("Fetching assignment details for id: {}", assignmentId);
         
-        ApiResponse<AssignmentDetailResponse> response = assignmentServiceRestClient.get()
-                .uri("/api/assignments/{id}", assignmentId)
-                .retrieve()
-                .body(new ParameterizedTypeReference<>() {});
+        try {
+            ApiResponse<AssignmentDetailResponse> response = assignmentServiceRestClient.get()
+                    .uri("/api/assignments/{id}", assignmentId)
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<>() {});
 
-        if (response != null && response.getData() != null) {
-            return response.getData();
+            if (response != null && response.getData() != null) {
+                return response.getData();
+            }
+            
+            throw new RuntimeException("Failed to fetch assignment details for id: " + assignmentId);
+        } catch (HttpClientErrorException.NotFound ex) {
+            throw new ResourceNotFoundException("Assignment not found with id: " + assignmentId);
         }
-        
-        throw new RuntimeException("Failed to fetch assignment details for id: " + assignmentId);
     }
 }

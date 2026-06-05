@@ -18,7 +18,6 @@ public interface SubmissionMapper {
     @Mapping(target = "result", ignore = true)
     SubmissionResponse toResponse(Submission submission);
 
-    @Mapping(target = "reason", ignore = true)
     @Mapping(target = "submissionId", source = "submission.id")
     ResultResponse toResultResponse(Result result);
 }

@@ -69,13 +69,13 @@ public class SubmissionService {
                 .effectiveLatenessHours(evalResult.effectiveLatenessHours())
                 .finalScore(evalResult.finalScore())
                 .status(evalResult.status())
+                .reason(evalResult.reason())
                 .build();
         resultRepository.save(result);
 
-        // Map to response and inject reason
+        // Map to response
         SubmissionResponse response = submissionMapper.toResponse(submission);
         ResultResponse resultResponse = submissionMapper.toResultResponse(result);
-        resultResponse.setReason(evalResult.reason());
         response.setResult(resultResponse);
 
         return response;

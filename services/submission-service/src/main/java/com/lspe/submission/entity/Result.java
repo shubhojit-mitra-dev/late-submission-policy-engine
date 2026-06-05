@@ -1,6 +1,8 @@
 package com.lspe.submission.entity;
 
 import com.lspe.common.enums.SubmissionStatus;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -53,8 +55,12 @@ public class Result {
     private Double finalScore;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(nullable = false, columnDefinition = "submission_status")
     private SubmissionStatus status;
+
+    @Column
+    private String reason;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime evaluatedAt;
