@@ -30,7 +30,7 @@ spring:
         format_sql: true
 
   flyway:
-    enabled: true
+    enabled: false
     url: jdbc:postgresql://localhost:5432/lspe_db
     user: lspe_user
     password: lspe_password
