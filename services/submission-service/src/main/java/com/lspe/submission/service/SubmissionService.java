@@ -80,4 +80,31 @@ public class SubmissionService {
 
         return response;
     }
+
+    public SubmissionResponse getSubmissionById(String id) {
+        Submission submission = submissionRepository.findById(id)
+                .orElseThrow(() -> new com.lspe.common.exception.ResourceNotFoundException("Submission not found"));
+        return mapToResponse(submission);
+    }
+
+    public java.util.List<SubmissionResponse> getSubmissionsByAssignment(String assignmentId) {
+        return submissionRepository.findByAssignmentId(assignmentId).stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    public java.util.List<SubmissionResponse> getSubmissionsByStudent(String studentIdentifier) {
+        return submissionRepository.findByStudentIdentifier(studentIdentifier).stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    private SubmissionResponse mapToResponse(Submission submission) {
+        SubmissionResponse response = submissionMapper.toResponse(submission);
+        resultRepository.findBySubmissionId(submission.getId()).ifPresent(result -> {
+            ResultResponse resultResponse = submissionMapper.toResultResponse(result);
+            response.setResult(resultResponse);
+        });
+        return response;
+    }
 }
