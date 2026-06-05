@@ -43,7 +43,7 @@ services:
     image: shubhojitmitradev/lspe-policy-service:latest
     container_name: lspe-policy-service
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/lspe_db?currentSchema=policy_schema
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/lspe_db?currentSchema=policy_schema&stringtype=unspecified
       SPRING_DATASOURCE_USERNAME: lspe_user
       SPRING_DATASOURCE_PASSWORD: lspe_password
       SPRING_FLYWAY_SCHEMAS: policy_schema
@@ -67,7 +67,7 @@ services:
     image: shubhojitmitradev/lspe-assignment-service:latest
     container_name: lspe-assignment-service
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/lspe_db?currentSchema=assignment_schema
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/lspe_db?currentSchema=assignment_schema&stringtype=unspecified
       SPRING_DATASOURCE_USERNAME: lspe_user
       SPRING_DATASOURCE_PASSWORD: lspe_password
       SPRING_FLYWAY_SCHEMAS: assignment_schema
@@ -94,7 +94,7 @@ services:
     image: shubhojitmitradev/lspe-submission-service:latest
     container_name: lspe-submission-service
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/lspe_db?currentSchema=submission_schema
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/lspe_db?currentSchema=submission_schema&stringtype=unspecified
       SPRING_DATASOURCE_USERNAME: lspe_user
       SPRING_DATASOURCE_PASSWORD: lspe_password
       SPRING_FLYWAY_SCHEMAS: submission_schema
@@ -129,9 +129,9 @@ services:
     image: shubhojitmitradev/lspe-api-gateway:latest
     container_name: lspe-api-gateway
     environment:
-      SPRING_CLOUD_GATEWAY_ROUTES_0_URI: http://policy-service:8081
-      SPRING_CLOUD_GATEWAY_ROUTES_1_URI: http://assignment-service:8082
-      SPRING_CLOUD_GATEWAY_ROUTES_2_URI: http://submission-service:8083
+      POLICY_SERVICE_URL: http://policy-service:8081
+      ASSIGNMENT_SERVICE_URL: http://assignment-service:8082
+      SUBMISSION_SERVICE_URL: http://submission-service:8083
     ports:
       - "8080:8080"
     networks:
