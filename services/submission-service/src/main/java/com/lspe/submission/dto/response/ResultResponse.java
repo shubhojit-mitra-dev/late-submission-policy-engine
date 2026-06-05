@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @Builder
 public class ResultResponse {
     private String id;
+    private String submissionId;
     private String policyVersionId;
     private Double rawScore;
     private Double penaltyApplied;
@@ -21,5 +22,6 @@ public class ResultResponse {
     private Double effectiveLatenessHours;
     private Double finalScore;
     private SubmissionStatus status;
+    private String reason;
     private LocalDateTime evaluatedAt;
 }
