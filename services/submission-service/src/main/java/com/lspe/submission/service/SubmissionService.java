@@ -38,35 +38,28 @@ public class SubmissionService {
     public SubmissionResponse submit(CreateSubmissionRequest request) {
         log.info("Processing new submission for assignment: {} by student: {}", request.getAssignmentId(), request.getStudentIdentifier());
 
-        // Step 1 — Fetch assignment from assignment-service
+        // Fetch assignment from assignment-service
         AssignmentDetailResponse assignment = assignmentServiceClient.getAssignment(request.getAssignmentId());
         if (assignment.getActivePolicyMapping() == null || assignment.getActivePolicyMapping().getPolicyVersionId() == null) {
             throw new InvalidPolicyException("No policy assigned to this assignment");
         }
 
-        // Step 2 — Fetch policy version from policy-service
+        // Fetch policy version from policy-service
         String policyVersionId = assignment.getActivePolicyMapping().getPolicyVersionId();
         PolicyVersionDetailResponse policyVersion = policyServiceClient.getPolicyVersion(policyVersionId);
 
-        // Step 3 — Check for duplicate submission
-        if (submissionRepository.findByAssignmentIdAndStudentIdentifier(request.getAssignmentId(), request.getStudentIdentifier()).isPresent()) {
-            throw new IllegalArgumentException("Duplicate submission for this assignment");
-        }
+        // Calculate lateness in hours
+        Duration duration = Duration.between(assignment.getDueDate(), request.getSubmittedAt());
+        double hoursLate = Math.max(0, duration.toMinutes() / 60.0);
 
-        // Step 4 — Calculate lateness in hours
-        double hoursLate = 0.0;
-        if (request.getSubmittedAt().isAfter(assignment.getDueDate())) {
-            Duration duration = Duration.between(assignment.getDueDate(), request.getSubmittedAt());
-            hoursLate = duration.toMinutes() / 60.0;
-        }
-
-        // Step 5 — Evaluate using domain engine
+        // Run evaluation
         EvaluationResult evalResult = evaluationEngine.evaluate(policyVersion, request.getOriginalScore(), hoursLate);
 
-        // Step 6 — Save to database
+        // Save submission
         Submission submission = submissionMapper.toEntity(request);
         submission = submissionRepository.save(submission);
 
+        // Build and save result
         Result result = Result.builder()
                 .submission(submission)
                 .policyVersionId(policyVersionId)
@@ -77,9 +70,9 @@ public class SubmissionService {
                 .finalScore(evalResult.finalScore())
                 .status(evalResult.status())
                 .build();
-        result = resultRepository.save(result);
+        resultRepository.save(result);
 
-        // Step 7 — Map to response and inject reason
+        // Map to response and inject reason
         SubmissionResponse response = submissionMapper.toResponse(submission);
         ResultResponse resultResponse = submissionMapper.toResultResponse(result);
         resultResponse.setReason(evalResult.reason());
