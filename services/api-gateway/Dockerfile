@@ -5,8 +5,12 @@ COPY mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
 COPY shared/common-lib/pom.xml shared/common-lib/pom.xml
-COPY shared/common-lib/src shared/common-lib/src
+COPY services/policy-service/pom.xml services/policy-service/pom.xml
+COPY services/assignment-service/pom.xml services/assignment-service/pom.xml
+COPY services/submission-service/pom.xml services/submission-service/pom.xml
 COPY services/api-gateway/pom.xml services/api-gateway/pom.xml
+
+COPY shared/common-lib/src shared/common-lib/src
 COPY services/api-gateway/src services/api-gateway/src
 
 RUN chmod +x mvnw && ./mvnw clean package -pl services/api-gateway -am -DskipTests
