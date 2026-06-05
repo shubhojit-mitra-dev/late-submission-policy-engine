@@ -1,12 +1,5 @@
-networks:
-  lspe-network:
-    driver: bridge
-
-volumes:
-  postgres-data:
-  rabbitmq-data:
-
 services:
+
   postgres:
     image: postgres:17-alpine
     container_name: lspe-postgres
@@ -45,3 +38,117 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  policy-service:
+    image: shubhojitmitradev/lspe-policy-service:latest
+    container_name: lspe-policy-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/lspe_db?currentSchema=policy_schema
+      SPRING_DATASOURCE_USERNAME: lspe_user
+      SPRING_DATASOURCE_PASSWORD: lspe_password
+      SPRING_FLYWAY_SCHEMAS: policy_schema
+      SPRING_FLYWAY_DEFAULT_SCHEMA: policy_schema
+      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: policy_schema
+    ports:
+      - "8081:8081"
+    networks:
+      - lspe-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8081/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  assignment-service:
+    image: shubhojitmitradev/lspe-assignment-service:latest
+    container_name: lspe-assignment-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/lspe_db?currentSchema=assignment_schema
+      SPRING_DATASOURCE_USERNAME: lspe_user
+      SPRING_DATASOURCE_PASSWORD: lspe_password
+      SPRING_FLYWAY_SCHEMAS: assignment_schema
+      SPRING_FLYWAY_DEFAULT_SCHEMA: assignment_schema
+      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: assignment_schema
+      SERVICES_POLICY_SERVICE_BASE_URL: http://policy-service:8081
+    ports:
+      - "8082:8082"
+    networks:
+      - lspe-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      policy-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8082/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  submission-service:
+    image: shubhojitmitradev/lspe-submission-service:latest
+    container_name: lspe-submission-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/lspe_db?currentSchema=submission_schema
+      SPRING_DATASOURCE_USERNAME: lspe_user
+      SPRING_DATASOURCE_PASSWORD: lspe_password
+      SPRING_FLYWAY_SCHEMAS: submission_schema
+      SPRING_FLYWAY_DEFAULT_SCHEMA: submission_schema
+      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: submission_schema
+      SERVICES_POLICY_SERVICE_BASE_URL: http://policy-service:8081
+      SERVICES_ASSIGNMENT_SERVICE_BASE_URL: http://assignment-service:8082
+    ports:
+      - "8083:8083"
+    networks:
+      - lspe-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      policy-service:
+        condition: service_healthy
+      assignment-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8083/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  api-gateway:
+    image: shubhojitmitradev/lspe-api-gateway:latest
+    container_name: lspe-api-gateway
+    environment:
+      SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_0_URI: http://policy-service:8081
+      SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_1_URI: http://assignment-service:8082
+      SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_2_URI: http://submission-service:8083
+    ports:
+      - "8080:8080"
+    networks:
+      - lspe-network
+    depends_on:
+      policy-service:
+        condition: service_healthy
+      assignment-service:
+        condition: service_healthy
+      submission-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+networks:
+  lspe-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  rabbitmq-data:
