@@ -102,12 +102,17 @@ services:
       SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: submission_schema
       SERVICES_POLICY_SERVICE_BASE_URL: http://policy-service:8081
       SERVICES_ASSIGNMENT_SERVICE_BASE_URL: http://assignment-service:8082
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_USERNAME: lspe_user
+      SPRING_RABBITMQ_PASSWORD: lspe_password
     ports:
       - "8083:8083"
     networks:
       - lspe-network
     depends_on:
       postgres:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
       policy-service:
         condition: service_healthy
@@ -124,9 +129,9 @@ services:
     image: shubhojitmitradev/lspe-api-gateway:latest
     container_name: lspe-api-gateway
     environment:
-      SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_0_URI: http://policy-service:8081
-      SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_1_URI: http://assignment-service:8082
-      SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_2_URI: http://submission-service:8083
+      SPRING_CLOUD_GATEWAY_ROUTES_0_URI: http://policy-service:8081
+      SPRING_CLOUD_GATEWAY_ROUTES_1_URI: http://assignment-service:8082
+      SPRING_CLOUD_GATEWAY_ROUTES_2_URI: http://submission-service:8083
     ports:
       - "8080:8080"
     networks:
