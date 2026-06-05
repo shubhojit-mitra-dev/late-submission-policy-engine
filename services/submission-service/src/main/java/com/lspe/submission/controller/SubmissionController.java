@@ -35,4 +35,16 @@ public class SubmissionController {
         SubmissionResponse response = submissionService.getSubmissionById(id);
         return ResponseEntity.ok(ApiResponse.of(response, "Submission retrieved successfully"));
     }
+
+    @GetMapping("/assignment/{assignmentId}")
+    public ResponseEntity<ApiResponse<java.util.List<SubmissionResponse>>> getSubmissionsByAssignment(@PathVariable String assignmentId) {
+        java.util.List<SubmissionResponse> list = submissionService.getSubmissionsByAssignment(assignmentId);
+        return ResponseEntity.ok(ApiResponse.of(list, "Submissions retrieved successfully"));
+    }
+
+    @GetMapping("/student/{studentIdentifier}")
+    public ResponseEntity<ApiResponse<java.util.List<SubmissionResponse>>> getSubmissionsByStudent(@PathVariable String studentIdentifier) {
+        java.util.List<SubmissionResponse> list = submissionService.getSubmissionsByStudent(studentIdentifier);
+        return ResponseEntity.ok(ApiResponse.of(list, "Submissions retrieved successfully"));
+    }
 }
