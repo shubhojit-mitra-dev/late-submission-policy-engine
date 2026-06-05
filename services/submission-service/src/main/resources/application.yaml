@@ -1,3 +1,47 @@
+server:
+  port: 8083
+
 spring:
   application:
     name: submission-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/lspe_db?currentSchema=submission_schema
+    username: lspe_user
+    password: lspe_password
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: SubmissionServicePool
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 300000
+      connection-timeout: 20000
+      max-lifetime: 1200000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: submission_schema
+        format_sql: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    schemas: submission_schema
+    default-schema: submission_schema
+
+services:
+  policy-service:
+    base-url: http://localhost:8081
+  assignment-service:
+    base-url: http://localhost:8082
+
+logging:
+  level:
+    com.lspe.submission: DEBUG
+    org.flywaydb: INFO
