@@ -126,7 +126,7 @@ export default function App() {
               })}
             </div>
 
-            {activeTab === "policy" && (
+            {(activeTab === "policy" || activeTab === "calculator") && (
               <div className="mt-4 bg-card border border-border rounded-lg overflow-hidden">
                 <div className="px-4 py-3 border-b border-border bg-secondary/40 flex items-center justify-between">
                   <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide">Saved Policies</h3>

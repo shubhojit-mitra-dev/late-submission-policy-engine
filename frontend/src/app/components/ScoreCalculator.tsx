@@ -76,8 +76,9 @@ export function ScoreCalculator({ policy }: Props) {
   return (
     <div className="space-y-4">
       <div className="bg-card border border-border rounded-lg overflow-hidden">
-        <div className="px-5 py-3 border-b border-border bg-secondary/40">
-          <h3 className="text-sm text-foreground">Score Evaluation (Backend API)</h3>
+        <div className="px-5 py-3 border-b border-border bg-secondary/40 flex items-center justify-between">
+          <h3 className="text-sm text-foreground">Score Evaluation: <span className="font-semibold">{policy.name}</span></h3>
+          <span className="text-xs text-muted-foreground uppercase tracking-wider">Backend API</span>
         </div>
         <div className="p-5 space-y-4">
           <div className="grid grid-cols-2 gap-4">
