@@ -32,13 +32,29 @@ export default function App() {
     try {
       setLoading(true);
       const data = await fetchApi<LatePolicy[]>("/policies");
-      setPolicies(data);
-      if (data.length > 0) {
-        let toSelect = data[0];
+      
+      // The backend @Mapper ignores 'versions' on the main PolicyResponse to prevent lazy init exceptions
+      // So we must explicitly fetch the versions for each policy to make Evaluate and Assignments work.
+      const policiesWithVersions = await Promise.all(
+        data.map(async (p) => {
+          try {
+            const versions = await fetchApi<{ id: string; versionNumber: number }[]>(`/policies/${p.id}/versions`);
+            // Sort to ensure highest version number is first
+            versions.sort((a, b) => b.versionNumber - a.versionNumber);
+            return { ...p, versions };
+          } catch (e) {
+            return p;
+          }
+        })
+      );
+
+      setPolicies(policiesWithVersions);
+      if (policiesWithVersions.length > 0) {
+        let toSelect = policiesWithVersions[0];
         if (selectedId) {
-            toSelect = data.find(p => p.id === selectedId) || data[0];
+            toSelect = policiesWithVersions.find(p => p.id === selectedId) || policiesWithVersions[0];
         } else if (activePolicy.id) {
-            toSelect = data.find(p => p.id === activePolicy.id) || data[0];
+            toSelect = policiesWithVersions.find(p => p.id === activePolicy.id) || policiesWithVersions[0];
         }
         setActivePolicy(toSelect);
       }
