@@ -1,11 +1,10 @@
-import { useState } from "react";
-import { Settings, Calculator, Table2, BookOpen, ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Settings, Calculator, Table2, BookOpen, ChevronRight, Plus } from "lucide-react";
 import { PolicyEditor, DEFAULT_POLICY } from "./components/PolicyEditor";
 import type { LatePolicy } from "./components/PolicyEditor";
 import { ScoreCalculator } from "./components/ScoreCalculator";
 import { AssignmentOverrides } from "./components/AssignmentOverrides";
-
-/* MARKER-MAKE-KIT-INVOKED */
+import { fetchApi } from "./api/client";
 
 type Tab = "policy" | "calculator" | "assignments";
 
@@ -17,20 +16,66 @@ const TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>("policy");
-  const [policy, setPolicy] = useState<LatePolicy>(DEFAULT_POLICY);
-  const [savedPolicies, setSavedPolicies] = useState<LatePolicy[]>([DEFAULT_POLICY]);
+  const [policies, setPolicies] = useState<LatePolicy[]>([]);
+  const [activePolicy, setActivePolicy] = useState<LatePolicy>(DEFAULT_POLICY);
+  const [isSaving, setIsSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  function handleSave() {
-    setSavedPolicies((prev) => {
-      const exists = prev.find((p) => p.id === policy.id);
-      if (exists) return prev.map((p) => (p.id === policy.id ? policy : p));
-      return [...prev, policy];
-    });
+  useEffect(() => {
+    loadPolicies();
+  }, []);
+
+  async function loadPolicies() {
+    try {
+      setLoading(true);
+      const data = await fetchApi<LatePolicy[]>("/policies");
+      setPolicies(data);
+      if (data.length > 0) {
+        setActivePolicy(data[0]);
+      }
+      setError(null);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleSave() {
+    try {
+      setIsSaving(true);
+      if (activePolicy.id) {
+        // Update
+        const res = await fetchApi<LatePolicy>(`/policies/${activePolicy.id}`, {
+          method: "PUT",
+          body: JSON.stringify(activePolicy),
+        });
+        setPolicies(prev => prev.map(p => p.id === res.id ? res : p));
+        setActivePolicy(res);
+      } else {
+        // Create
+        const res = await fetchApi<LatePolicy>("/policies", {
+          method: "POST",
+          body: JSON.stringify(activePolicy),
+        });
+        setPolicies(prev => [...prev, res]);
+        setActivePolicy(res);
+      }
+      setError(null);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  function handleCreateNew() {
+    setActivePolicy(DEFAULT_POLICY);
   }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Top bar */}
       <header className="bg-primary text-primary-foreground border-b border-primary/10">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center gap-3">
           <BookOpen size={20} className="text-primary-foreground/70" />
@@ -43,7 +88,6 @@ export default function App() {
       </header>
 
       <div className="max-w-6xl mx-auto w-full px-6 py-8 flex-1">
-        {/* Page heading */}
         <div className="mb-8">
           <h1 className="text-foreground mb-1">Late Submission Policies</h1>
           <p className="text-muted-foreground text-sm">
@@ -51,8 +95,13 @@ export default function App() {
           </p>
         </div>
 
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 text-red-700 border border-red-200 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
+
         <div className="flex gap-8 items-start">
-          {/* Sidebar nav */}
           <nav className="w-52 shrink-0 sticky top-6">
             <div className="bg-card border border-border rounded-lg overflow-hidden">
               {TABS.map((tab) => {
@@ -75,43 +124,55 @@ export default function App() {
               })}
             </div>
 
-            {/* Active policy summary */}
-            <div className="mt-4 bg-card border border-border rounded-lg p-4 space-y-2">
-              <div className="text-xs text-muted-foreground uppercase tracking-wide">Active Policy</div>
-              <div className="text-sm text-foreground">{policy.name}</div>
-              <div className="space-y-1">
-                <div className="flex justify-between text-xs">
-                  <span className="text-muted-foreground">Grace</span>
-                  <span className="mono text-foreground">
-                    {policy.gracePeriodEnabled
-                      ? `${policy.gracePeriodValue}${policy.gracePeriodUnit === "hours" ? "h" : "d"}`
-                      : "off"}
-                  </span>
+            {activeTab === "policy" && (
+              <div className="mt-4 bg-card border border-border rounded-lg overflow-hidden">
+                <div className="px-4 py-3 border-b border-border bg-secondary/40 flex items-center justify-between">
+                  <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide">Saved Policies</h3>
+                  <button onClick={handleCreateNew} className="text-primary hover:text-primary/70">
+                    <Plus size={14} />
+                  </button>
                 </div>
-                <div className="flex justify-between text-xs">
-                  <span className="text-muted-foreground">Penalty</span>
-                  <span className="mono text-foreground capitalize">{policy.penaltyMode.replace("_", " ")}</span>
-                </div>
-                <div className="flex justify-between text-xs">
-                  <span className="text-muted-foreground">Accept late</span>
-                  <span className={`mono text-xs ${policy.acceptAfterDeadline ? "text-emerald-600" : "text-destructive"}`}>
-                    {policy.acceptAfterDeadline ? "yes" : "no"}
-                  </span>
+                <div className="max-h-[300px] overflow-y-auto">
+                  {loading ? (
+                    <div className="p-4 text-xs text-muted-foreground text-center">Loading...</div>
+                  ) : policies.length === 0 ? (
+                    <div className="p-4 text-xs text-muted-foreground text-center">No policies found</div>
+                  ) : (
+                    <ul className="divide-y divide-border">
+                      {policies.map(p => (
+                        <li key={p.id}>
+                          <button
+                            onClick={() => setActivePolicy(p)}
+                            className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
+                              activePolicy.id === p.id ? "bg-primary/5 text-primary" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                            }`}
+                          >
+                            <div className="truncate">{p.name}</div>
+                            <div className="text-[10px] uppercase opacity-70 mt-0.5">{p.penaltyType} • {p.penaltyValue}{p.penaltyType === 'PERCENTAGE' ? '%' : 'pts'} / day</div>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               </div>
-            </div>
+            )}
           </nav>
 
-          {/* Main content */}
           <main className="flex-1 min-w-0">
             {activeTab === "policy" && (
-              <PolicyEditor policy={policy} onChange={setPolicy} onSave={handleSave} />
+              <PolicyEditor
+                policy={activePolicy}
+                onChange={setActivePolicy}
+                onSave={handleSave}
+                isSaving={isSaving}
+              />
             )}
             {activeTab === "calculator" && (
-              <ScoreCalculator policy={policy} />
+              <ScoreCalculator policy={activePolicy} />
             )}
             {activeTab === "assignments" && (
-              <AssignmentOverrides savedPolicies={savedPolicies} />
+              <AssignmentOverrides savedPolicies={policies} />
             )}
           </main>
         </div>
