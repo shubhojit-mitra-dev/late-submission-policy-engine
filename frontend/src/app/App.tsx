@@ -28,13 +28,19 @@ export default function App() {
     loadPolicies();
   }, []);
 
-  async function loadPolicies() {
+  async function loadPolicies(selectedId?: string) {
     try {
       setLoading(true);
       const data = await fetchApi<LatePolicy[]>("/policies");
       setPolicies(data);
       if (data.length > 0) {
-        setActivePolicy(data[0]);
+        let toSelect = data[0];
+        if (selectedId) {
+            toSelect = data.find(p => p.id === selectedId) || data[0];
+        } else if (activePolicy.id) {
+            toSelect = data.find(p => p.id === activePolicy.id) || data[0];
+        }
+        setActivePolicy(toSelect);
       }
       setError(null);
     } catch (err: any) {
@@ -47,23 +53,22 @@ export default function App() {
   async function handleSave() {
     try {
       setIsSaving(true);
-      if (activePolicy.id) {
+      let targetId = activePolicy.id;
+      if (targetId) {
         // Update
-        const res = await fetchApi<LatePolicy>(`/policies/${activePolicy.id}`, {
+        await fetchApi<LatePolicy>(`/policies/${targetId}`, {
           method: "PUT",
           body: JSON.stringify(activePolicy),
         });
-        setPolicies(prev => prev.map(p => p.id === res.id ? res : p));
-        setActivePolicy(res);
       } else {
         // Create
         const res = await fetchApi<LatePolicy>("/policies", {
           method: "POST",
           body: JSON.stringify(activePolicy),
         });
-        setPolicies(prev => [...prev, res]);
-        setActivePolicy(res);
+        targetId = res.id;
       }
+      await loadPolicies(targetId);
       setError(null);
     } catch (err: any) {
       setError(err.message);
