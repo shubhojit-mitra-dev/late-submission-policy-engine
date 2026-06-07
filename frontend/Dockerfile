@@ -2,7 +2,7 @@
 FROM node:22-alpine AS builder
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
-RUN corepack enable pnpm && pnpm install
+RUN corepack enable pnpm && pnpm config set strict-dep-builds false && pnpm install
 COPY . .
 RUN pnpm build
 
