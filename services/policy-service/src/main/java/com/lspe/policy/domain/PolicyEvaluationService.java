@@ -38,12 +38,15 @@ public class PolicyEvaluationService {
             );
         }
 
+        // Calculate number of days late (rounded up to the next full day)
+        long daysLate = (long) Math.ceil(effectiveLatenessHours / 24.0);
+
         // Calculate penalty based on type:
         double penalty = 0.0;
         if (policy.getPenaltyType() == PenaltyType.PERCENTAGE) {
-            penalty = originalScore * (policy.getPenaltyValue() / 100.0);
+            penalty = originalScore * (policy.getPenaltyValue() / 100.0) * daysLate;
         } else if (policy.getPenaltyType() == PenaltyType.FIXED) {
-            penalty = policy.getPenaltyValue();
+            penalty = policy.getPenaltyValue() * daysLate;
         }
 
         // Apply max penalty cap:
