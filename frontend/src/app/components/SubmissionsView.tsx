@@ -72,6 +72,34 @@ export function SubmissionsView() {
   }
 
   const selectClass = "bg-input-background border border-border rounded-md px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors appearance-none cursor-pointer w-72";
+  const inputClass = "bg-input-background border border-border rounded-md px-2.5 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors w-full";
+
+  const [adding, setAdding] = useState(false);
+  const [newStudent, setNewStudent] = useState("");
+  const [newScore, setNewScore] = useState(100);
+  const [newDate, setNewDate] = useState("");
+
+  async function handleAddSubmission() {
+    if (!selectedAssignmentId || !newStudent || !newDate) return;
+    try {
+      await fetchApi("/submissions", {
+        method: "POST",
+        body: JSON.stringify({
+          assignmentId: selectedAssignmentId,
+          studentIdentifier: newStudent,
+          originalScore: newScore,
+          submittedAt: new Date(newDate).toISOString()
+        })
+      });
+      setAdding(false);
+      setNewStudent("");
+      setNewScore(100);
+      setNewDate("");
+      loadSubmissions(selectedAssignmentId);
+    } catch (err: any) {
+      alert("Failed to create submission: " + err.message);
+    }
+  }
 
   return (
     <div className="space-y-4">
@@ -113,7 +141,7 @@ export function SubmissionsView() {
                 <tr>
                   <td colSpan={6} className="px-5 py-8 text-center text-sm text-muted-foreground">Loading submissions...</td>
                 </tr>
-              ) : submissions.length === 0 ? (
+              ) : submissions.length === 0 && !adding ? (
                 <tr>
                   <td colSpan={6} className="px-5 py-8 text-center text-sm text-muted-foreground">No submissions found for this assignment.</td>
                 </tr>
@@ -147,9 +175,26 @@ export function SubmissionsView() {
                   )
                 })
               )}
+              {adding && (
+                <tr className="bg-secondary/20">
+                  <td className="px-5 py-3"><input className={inputClass} placeholder="Student ID" value={newStudent} onChange={(e) => setNewStudent(e.target.value)} /></td>
+                  <td className="px-4 py-3"><input type="datetime-local" className={inputClass} value={newDate} onChange={(e) => setNewDate(e.target.value)} /></td>
+                  <td className="px-4 py-3"><input type="number" className={inputClass} value={newScore} onChange={(e) => setNewScore(+e.target.value)} /></td>
+                  <td colSpan={2}></td>
+                  <td className="px-5 py-3 flex gap-2">
+                    <button onClick={handleAddSubmission} className="px-3 py-1 bg-primary text-primary-foreground rounded-md text-xs">Submit</button>
+                    <button onClick={() => setAdding(false)} className="px-3 py-1 bg-muted text-muted-foreground rounded-md text-xs">Cancel</button>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
+        {selectedAssignmentId && !adding && (
+           <div className="px-5 py-3 border-t border-border">
+             <button onClick={() => setAdding(true)} className="text-xs text-primary hover:text-primary/70">+ Add Manual Submission</button>
+           </div>
+        )}
       </div>
     </div>
   );
