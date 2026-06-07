@@ -77,6 +77,21 @@ export default function App() {
     }
   }
 
+  async function handleDeletePolicy() {
+    if (!activePolicy.id) return;
+    if (!confirm("Are you sure you want to delete this policy? This cannot be undone.")) return;
+    try {
+      setIsSaving(true);
+      await fetchApi(`/policies/${activePolicy.id}`, { method: "DELETE" });
+      setActivePolicy(DEFAULT_POLICY);
+      await loadPolicies();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   function handleCreateNew() {
     setActivePolicy(DEFAULT_POLICY);
   }
@@ -172,6 +187,7 @@ export default function App() {
                 policy={activePolicy}
                 onChange={setActivePolicy}
                 onSave={handleSave}
+                onDelete={handleDeletePolicy}
                 isSaving={isSaving}
               />
             )}

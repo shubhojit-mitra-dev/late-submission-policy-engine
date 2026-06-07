@@ -29,6 +29,7 @@ interface Props {
   policy: LatePolicy;
   onChange: (p: LatePolicy) => void;
   onSave: () => void;
+  onDelete?: () => void;
   isSaving?: boolean;
 }
 
@@ -64,7 +65,7 @@ function SectionCard({ title, children }: { title: string; children: React.React
   );
 }
 
-export function PolicyEditor({ policy, onChange, onSave, isSaving }: Props) {
+export function PolicyEditor({ policy, onChange, onSave, onDelete, isSaving }: Props) {
   function set<K extends keyof LatePolicy>(key: K, val: LatePolicy[K]) {
     onChange({ ...policy, [key]: val });
   }
@@ -167,17 +168,28 @@ export function PolicyEditor({ policy, onChange, onSave, isSaving }: Props) {
         </div>
       </SectionCard>
 
-      <button
-        onClick={onSave}
-        disabled={isSaving}
-        className={`w-full py-2.5 rounded-md text-sm transition-all flex items-center justify-center gap-2 ${
-          isSaving
-            ? "bg-primary/50 text-white cursor-not-allowed"
-            : "bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.99]"
-        }`}
-      >
-        {isSaving ? "Saving..." : "Save Policy"}
-      </button>
+      <div className="flex gap-3">
+        {policy.id && onDelete && (
+          <button
+            onClick={onDelete}
+            disabled={isSaving}
+            className="px-4 py-2.5 rounded-md text-sm transition-all border border-destructive/30 text-destructive hover:bg-destructive/10 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Delete
+          </button>
+        )}
+        <button
+          onClick={onSave}
+          disabled={isSaving}
+          className={`flex-1 py-2.5 rounded-md text-sm transition-all flex items-center justify-center gap-2 ${
+            isSaving
+              ? "bg-primary/50 text-white cursor-not-allowed"
+              : "bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.99]"
+          }`}
+        >
+          {isSaving ? "Saving..." : "Save Policy"}
+        </button>
+      </div>
     </div>
   );
 }
