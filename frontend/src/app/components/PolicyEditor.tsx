@@ -11,6 +11,7 @@ export interface LatePolicy {
   maxPenalty: number;
   rejectAfterDays: number;
   active: boolean;
+  versions?: { id: string; versionNumber: number }[];
 }
 
 export const DEFAULT_POLICY: LatePolicy = {
@@ -139,7 +140,7 @@ export function PolicyEditor({ policy, onChange, onSave, isSaving }: Props) {
               type="number"
               min={0}
               className={inputClass}
-              value={policy.maxPenaltyCap || policy.maxPenalty}
+              value={policy.maxPenalty || 0}
               onChange={(e) => set("maxPenalty", Math.max(0, +e.target.value))}
             />
           </div>
