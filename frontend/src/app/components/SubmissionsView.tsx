@@ -7,7 +7,7 @@ export interface SubmissionResult {
   id: string;
   submissionId: string;
   policyVersionId: string;
-  rawScore: number;
+  originalScore: number;
   penaltyApplied: number;
   latenessHours: number;
   effectiveLatenessHours: number;
@@ -162,7 +162,7 @@ export function SubmissionsView() {
                     <tr key={s.id} className="hover:bg-muted/20 transition-colors">
                       <td className="px-5 py-3 text-sm text-foreground font-medium">{s.studentIdentifier}</td>
                       <td className="px-4 py-3 text-sm text-muted-foreground mono">{new Date(s.submittedAt).toLocaleString()}</td>
-                      <td className="px-4 py-3 text-sm text-right mono">{res.rawScore.toFixed(1)}</td>
+                      <td className="px-4 py-3 text-sm text-right mono">{res.originalScore.toFixed(1)}</td>
                       <td className="px-4 py-3 text-sm text-right mono text-destructive">{res.penaltyApplied > 0 ? `-${res.penaltyApplied.toFixed(1)}` : "-"}</td>
                       <td className="px-4 py-3 text-sm text-right mono font-semibold">{res.finalScore.toFixed(1)}</td>
                       <td className="px-5 py-3">

@@ -9,7 +9,7 @@ interface Props {
 
 interface CalcResult {
   status: "ACCEPTED" | "LATE_ACCEPTED" | "REJECTED";
-  rawScore: number;
+  originalScore: number;
   finalScore: number;
   penaltyApplied: number;
   latenessHours: number;
@@ -138,7 +138,7 @@ export function ScoreCalculator({ policy }: Props) {
             <div className="flex items-end justify-between mb-4">
               <div>
                 <div className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Original Score</div>
-                <div className="mono text-2xl text-foreground">{result.rawScore.toFixed(1)}</div>
+                <div className="mono text-2xl text-foreground">{result.originalScore.toFixed(1)}</div>
               </div>
               {result.penaltyApplied > 0 && (
                 <div className="text-center">
@@ -148,7 +148,7 @@ export function ScoreCalculator({ policy }: Props) {
               )}
               <div className="text-right">
                 <div className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Final Score</div>
-                <div className={`mono text-2xl ${result.finalScore < result.rawScore ? "text-amber-600" : "text-emerald-600"}`}>
+                <div className={`mono text-2xl ${result.finalScore < result.originalScore ? "text-amber-600" : "text-emerald-600"}`}>
                   {result.finalScore.toFixed(1)}
                 </div>
               </div>

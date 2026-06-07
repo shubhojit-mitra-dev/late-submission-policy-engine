@@ -28,13 +28,35 @@ export default function App() {
     loadPolicies();
   }, []);
 
-  async function loadPolicies() {
+  async function loadPolicies(selectedId?: string) {
     try {
       setLoading(true);
       const data = await fetchApi<LatePolicy[]>("/policies");
-      setPolicies(data);
-      if (data.length > 0) {
-        setActivePolicy(data[0]);
+      
+      // The backend @Mapper ignores 'versions' on the main PolicyResponse to prevent lazy init exceptions
+      // So we must explicitly fetch the versions for each policy to make Evaluate and Assignments work.
+      const policiesWithVersions = await Promise.all(
+        data.map(async (p) => {
+          try {
+            const versions = await fetchApi<{ id: string; versionNumber: number }[]>(`/policies/${p.id}/versions`);
+            // Sort to ensure highest version number is first
+            versions.sort((a, b) => b.versionNumber - a.versionNumber);
+            return { ...p, versions };
+          } catch (e) {
+            return p;
+          }
+        })
+      );
+
+      setPolicies(policiesWithVersions);
+      if (policiesWithVersions.length > 0) {
+        let toSelect = policiesWithVersions[0];
+        if (selectedId) {
+            toSelect = policiesWithVersions.find(p => p.id === selectedId) || policiesWithVersions[0];
+        } else if (activePolicy.id) {
+            toSelect = policiesWithVersions.find(p => p.id === activePolicy.id) || policiesWithVersions[0];
+        }
+        setActivePolicy(toSelect);
       }
       setError(null);
     } catch (err: any) {
@@ -47,24 +69,38 @@ export default function App() {
   async function handleSave() {
     try {
       setIsSaving(true);
-      if (activePolicy.id) {
+      let targetId = activePolicy.id;
+      if (targetId) {
         // Update
-        const res = await fetchApi<LatePolicy>(`/policies/${activePolicy.id}`, {
+        await fetchApi<LatePolicy>(`/policies/${targetId}`, {
           method: "PUT",
           body: JSON.stringify(activePolicy),
         });
-        setPolicies(prev => prev.map(p => p.id === res.id ? res : p));
-        setActivePolicy(res);
       } else {
         // Create
         const res = await fetchApi<LatePolicy>("/policies", {
           method: "POST",
           body: JSON.stringify(activePolicy),
         });
-        setPolicies(prev => [...prev, res]);
-        setActivePolicy(res);
+        targetId = res.id;
       }
+      await loadPolicies(targetId);
       setError(null);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  async function handleDeletePolicy() {
+    if (!activePolicy.id) return;
+    if (!confirm("Are you sure you want to delete this policy? This cannot be undone.")) return;
+    try {
+      setIsSaving(true);
+      await fetchApi(`/policies/${activePolicy.id}`, { method: "DELETE" });
+      setActivePolicy(DEFAULT_POLICY);
+      await loadPolicies();
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -167,6 +203,7 @@ export default function App() {
                 policy={activePolicy}
                 onChange={setActivePolicy}
                 onSave={handleSave}
+                onDelete={handleDeletePolicy}
                 isSaving={isSaving}
               />
             )}
