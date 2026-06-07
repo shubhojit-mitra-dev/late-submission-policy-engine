@@ -57,7 +57,7 @@ export function AssignmentOverrides({ savedPolicies }: Props) {
     { id: "strict", name: "Strict (No Grace)" },
     { id: "lenient", name: "Lenient (48h Grace)" },
     { id: "no_late", name: "No Late Accepted" },
-    ...savedPolicies.filter(p => !["default","strict","lenient","no_late"].includes(p.id)).map(p => ({ id: p.id, name: p.name })),
+    ...savedPolicies.filter(p => p.id && !["default","strict","lenient","no_late"].includes(p.id)).map(p => ({ id: p.id as string, name: p.name })),
   ];
 
   function startEdit(a: Assignment) {
