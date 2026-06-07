@@ -150,6 +150,19 @@ services:
       retries: 5
       start_period: 60s
 
+  frontend:
+    build:
+      context: ../../frontend
+    image: shubhojitmitradev/lspe-frontend:latest
+    container_name: lspe-frontend
+    ports:
+      - "5173:80"
+    networks:
+      - lspe-network
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+
 networks:
   lspe-network:
     driver: bridge
