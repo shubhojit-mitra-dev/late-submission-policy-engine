@@ -4,6 +4,7 @@ import { PolicyEditor, DEFAULT_POLICY } from "./components/PolicyEditor";
 import type { LatePolicy } from "./components/PolicyEditor";
 import { ScoreCalculator } from "./components/ScoreCalculator";
 import { AssignmentOverrides } from "./components/AssignmentOverrides";
+import { fetchApi } from "./api/client";
 import { SubmissionsView } from "./components/SubmissionsView";
 
 type Tab = "policy" | "calculator" | "assignments" | "submissions";
@@ -174,6 +175,9 @@ export default function App() {
             )}
             {activeTab === "assignments" && (
               <AssignmentOverrides savedPolicies={policies} />
+            )}
+            {activeTab === "submissions" && (
+              <SubmissionsView />
             )}
           </main>
         </div>
