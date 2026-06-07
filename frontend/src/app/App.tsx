@@ -4,14 +4,15 @@ import { PolicyEditor, DEFAULT_POLICY } from "./components/PolicyEditor";
 import type { LatePolicy } from "./components/PolicyEditor";
 import { ScoreCalculator } from "./components/ScoreCalculator";
 import { AssignmentOverrides } from "./components/AssignmentOverrides";
-import { fetchApi } from "./api/client";
+import { SubmissionsView } from "./components/SubmissionsView";
 
-type Tab = "policy" | "calculator" | "assignments";
+type Tab = "policy" | "calculator" | "assignments" | "submissions";
 
 const TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "policy", label: "Policy Configuration", icon: Settings },
   { id: "calculator", label: "Score Preview", icon: Calculator },
   { id: "assignments", label: "Assignment Overrides", icon: Table2 },
+  { id: "submissions", label: "Submissions", icon: BookOpen },
 ];
 
 export default function App() {
